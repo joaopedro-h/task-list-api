@@ -1,3 +1,4 @@
 node_modules/
-database/
+sources/database/*
+!sources/database/.gitkeep
 /nodemon.json
