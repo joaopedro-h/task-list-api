@@ -23,10 +23,11 @@ class UserController {
         `INSERT INTO users (name, email, password_hash)
         VALUES (?, ?, ?)`;
 
-        await connection.execute(sqlUserCreate,[name, email, hashPassword]);
+        const [result] = await connection.execute(sqlUserCreate,[name, email, hashPassword]);
 
         return res.status(201).json({
-            message: "Usuário criado com sucesso!"
+            message: "Usuário criado com sucesso!",
+            "ID do usurário": result.insertId
         });
     }
 
