@@ -1,5 +1,6 @@
 import connection from "../../database/connection";
 import encryptPassword from "../../utils/encryptPassword";
+import decryptPassword from "../../utils/decryptPassword";
 
 class UserController {
 
@@ -33,12 +34,53 @@ class UserController {
 
     async update(req, res){
 
-        console.log(req.userId);
+        const {name, email, oldPassword} = req.body;
+
+        const [resultUser] = await connection.execute(
+        `SELECT * FROM users
+        WHERE id = ?`, [req.userId]);
+
+        const user = resultUser[0];
         
-        return res.json({message: "Ok"})
+        if (email !== user.email) {
+            
+            const [userExists] = await connection.execute(
+            `SELECT email FROM users
+            WHERE email = ?`, [email]);
 
+            if (userExists.length > 0) {
+                return res.status(400).json({
+                    error: "Email já em uso!"
+                });
+            }
+        }
+
+        if (oldPassword) {
+
+            const hashPassword = await decryptPassword(oldPassword,user);
+
+            if (!hashPassword) {
+                return res.status(401).json({
+                    error: "Senha incorreta!"
+                })
+            }
+        }
+
+        await connection.execute(
+            "UPDATE users SET name = ?, email = ? WHERE id = ?",
+            [name, email, req.userId]
+        );
+
+        return res.json({
+            message: "Usuário atualizado",
+            user:{
+                id: req.userId,
+                name,
+                email
+            }
+        });
+    
     }
-
 }
 
 export default new UserController();
