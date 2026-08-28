@@ -34,7 +34,7 @@ class UserController {
 
     async update(req, res){
 
-        const {name, email, oldPassword} = req.body;
+        const {name, email, oldPassword, password} = req.body;
 
         const [resultUser] = await connection.execute(
         `SELECT * FROM users
@@ -55,21 +55,53 @@ class UserController {
             }
         }
 
-        if (oldPassword) {
-
+        if (password) {
+            
+            if (!oldPassword) {
+                return res.status(401).json({
+                    error: "Informe sua senha atual!"
+                });
+            }
+            
             const hashPassword = await decryptPassword(oldPassword,user);
 
             if (!hashPassword) {
                 return res.status(401).json({
                     error: "Senha incorreta!"
-                })
+                });
             }
         }
 
-        await connection.execute(
-            "UPDATE users SET name = ?, email = ? WHERE id = ?",
-            [name, email, req.userId]
-        );
+        const fields = [];
+        const values = [];
+
+
+        if (name) {
+            fields.push("name = ?");
+            values.push(name);
+        }
+
+        if (email) {
+            fields.push("email = ?");
+            values.push(email);
+        }
+
+        if (password) {
+
+            const hashPassword = await encryptPassword(password);
+
+            fields.push("password_hash = ?");
+            values.push(hashPassword);
+        }
+
+        values.push(req.userId);
+
+        const sqlUpdate =
+        `UPDATE users
+        SET ${fields.join(", ")}
+        WHERE id = ?`
+        
+        await connection.execute(sqlUpdate,values);
 
         return res.json({
             message: "Usuário atualizado",
