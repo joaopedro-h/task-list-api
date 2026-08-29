@@ -5,7 +5,7 @@ import decryptPassword from "../../utils/decryptPassword";
 
 class UserController {
 
-    async store(req, res){
+    async store(req, res){ // Método responsável por cadastrar um usuário.
 
         const schema = Yup.object().shape({
             name: Yup.string().required(),
@@ -45,7 +45,7 @@ class UserController {
         });
     }
 
-    async update(req, res){
+    async update(req, res){ // Método responsável por atualizar o cadastro de um usuário.
 
         const schema = Yup.object().shape({
             name: Yup.string(),
