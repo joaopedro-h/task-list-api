@@ -91,6 +91,42 @@ class TaskController {
 
     }
 
+    async destroy(req, res) {
+
+        const schema = Yup.object().shape({
+            task_id: Yup.string().required()
+        });
+
+        if (!(await schema.isValid(req.params))) {
+            return res.status(400).json({
+                error: "Tarefa não selecionada!"
+            });              
+        }
+
+        const {task_id} = req.params;
+
+        const [task] = await connection.execute(
+        `SELECT * FROM tasks
+        WHERE id = ?`, [task_id]);
+
+        const [sqlCheckTask] = await connection.execute(
+            `DELETE FROM tasks
+            WHERE id = ? AND user_id = ?`, [task_id, req.userId]
+        )
+
+        if (sqlCheckTask.affectedRows === 0) {
+            return res.status(401).json({
+                error: "Não foi possível concluir a tarefa!"
+            })
+        }
+
+        return res.status(200).json({
+            message: "Tarefa removida com sucesso!",
+            tarefa: task
+        });
+
+    }
+
 }
 
 export default new TaskController();
