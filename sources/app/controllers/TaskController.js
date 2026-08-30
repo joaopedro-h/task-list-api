@@ -68,6 +68,16 @@ class TaskController {
 
         const {task_id} = req.params;
 
+        const [task] = await connection.execute(
+        `SELECT * FROM tasks
+        WHERE id = ?`, [task_id]);
+
+        if (!task.length > 0) {
+            return res.status(400).json({
+                error: "Tarefa não existe!"
+            })
+        }
+        
         const [sqlCheckTask] = await connection.execute(
             `UPDATE tasks
             SET check_task = 1
@@ -76,13 +86,9 @@ class TaskController {
 
         if (sqlCheckTask.affectedRows === 0) {
             return res.status(401).json({
-                error: "Não foi possível concluir a tarefa!"
+                error: "Não é possível concluir tarefas de outros usuários!"
             })
         }
-
-        const [task] = await connection.execute(
-        `SELECT * FROM tasks
-        WHERE id = ?`, [task_id]);
 
         return res.status(200).json({
             message: "Tarefa concluída com sucesso!",
@@ -109,14 +115,20 @@ class TaskController {
         `SELECT * FROM tasks
         WHERE id = ?`, [task_id]);
 
-        const [sqlCheckTask] = await connection.execute(
+        if (!task.length > 0) {
+            return res.status(400).json({
+                error: "Tarefa não existe!"
+            })
+        }
+
+        const [sqlDeleteTask] = await connection.execute(
             `DELETE FROM tasks
             WHERE id = ? AND user_id = ?`, [task_id, req.userId]
         )
 
-        if (sqlCheckTask.affectedRows === 0) {
+        if (sqlDeleteTask.affectedRows === 0) {
             return res.status(401).json({
-                error: "Não foi possível concluir a tarefa!"
+                error: "Não é possível remover tarefas de outros usuários!"
             })
         }
 
