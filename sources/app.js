@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import routes from "./routes";
 
 class App { // Classe para configurar o Express.
@@ -10,11 +11,11 @@ class App { // Classe para configurar o Express.
         // Chama as funções para configurar os middlewares e as rotas.
         this.middlewares();
         this.routes();
-
     }
 
     // Configura os middlewares.
     middlewares(){
+        this.server.use(cors());
         this.server.use(express.json());
     }
 
