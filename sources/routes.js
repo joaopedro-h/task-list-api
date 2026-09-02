@@ -22,5 +22,4 @@ routes.put("/tasks/{:task_id}", TaskController.update); // Cria a rota para conc
 
 routes.delete("/tasks/{:task_id}", TaskController.destroy); // Cria a rota para deletar a tarefa selecionada.
 
-
 export default routes; // Exporta o routes para ser usado no "app.js".
